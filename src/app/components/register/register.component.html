@@ -1,1 +1,230 @@
-<p>register works!</p>
+<div class="register-container">
+  <mat-card class="register-card">
+    <div class="left-pane">
+      <div class="brand">
+        <h2>Crear cuenta</h2>
+        <p class="subtitle">
+          Administra laboratorios y resultados de forma simple y segura.
+        </p>
+      </div>
+
+      <div class="art">
+        <img src="assets/scientist.png" alt="Ilustración" />
+      </div>
+
+      <ul class="bullets">
+        <li><mat-icon>verified_user</mat-icon> Seguridad y trazabilidad</li>
+        <li><mat-icon>analytics</mat-icon> Resultados centralizados</li>
+        <li><mat-icon>table_view</mat-icon> Gestión por laboratorio</li>
+      </ul>
+    </div>
+
+    <div class="right-pane">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
+        <h3>Datos personales</h3>
+
+        <mat-form-field appearance="outline">
+          <mat-label>RUT</mat-label>
+          <input
+            matInput
+            maxLength="12"
+            formControlName="rut"
+            placeholder="12345678-9"
+          />
+          <mat-error *ngIf="form.get('rut')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+          <mat-error *ngIf="form.get('rut')?.hasError('pattern')">
+            Formato inválido (ej: 12.345.678-9)
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nombres</mat-label>
+          <input matInput formControlName="name" />
+          <mat-error *ngIf="form.get('name')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Apellidos</mat-label>
+          <input matInput formControlName="lastName" />
+          <mat-error *ngIf="form.get('lastName')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono</mat-label>
+          <input
+            matInput
+            maxLength="12"
+            formControlName="phone"
+            placeholder="+56912345678"
+          />
+          <mat-error *ngIf="form.get('phone')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de nacimiento</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="birthDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker max="new Date()" #picker></mat-datepicker>
+          <mat-error *ngIf="form.get('birthDate')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+          <mat-error *ngIf="form.get('birthDate')?.hasError('invalidDate')">
+            Fecha inválida
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-span-2">
+          <mat-label>Dirección</mat-label>
+          <input matInput formControlName="address" />
+          <mat-error *ngIf="form.get('address')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Comuna</mat-label>
+          <mat-select formControlName="comunaId">
+            <mat-option *ngFor="let c of comunas" [value]="c.id">
+              {{ c.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('comunaId')?.hasError('required')">
+            Selecciona una comuna
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Laboratorio</mat-label>
+          <mat-select formControlName="laboratoryId">
+            <mat-option *ngFor="let l of labs" [value]="l.id">
+              {{ l.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('laboratoryId')?.hasError('required')">
+            Selecciona un laboratorio
+          </mat-error>
+        </mat-form-field>
+
+        <h3 class="section">Cuenta y acceso</h3>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Correo</mat-label>
+          <input matInput formControlName="email" type="email" />
+          <mat-error *ngIf="form.get('email')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+          <mat-error *ngIf="form.get('email')?.hasError('email')">
+            Correo inválido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Usuario</mat-label>
+          <input matInput formControlName="username" />
+          <mat-error *ngIf="form.get('username')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña</mat-label>
+          <input
+            matInput
+            [type]="hidePass ? 'password' : 'text'"
+            formControlName="password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePass = !hidePass"
+          >
+            <mat-icon>{{
+              hidePass ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+          <mat-hint>8+ caracteres, 1 mayúscula y 1 número</mat-hint>
+          <mat-error *ngIf="form.get('password')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+          <mat-error *ngIf="form.get('password')?.hasError('pattern')">
+            Contraseña insegura
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmar contraseña</mat-label>
+          <input
+            matInput
+            [type]="hideConfirm ? 'password' : 'text'"
+            formControlName="confirmPassword"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hideConfirm = !hideConfirm"
+          >
+            <mat-icon>{{
+              hideConfirm ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+          <mat-error *ngIf="form.get('confirmPassword')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+          <mat-error *ngIf="form.get('confirmPassword')?.hasError('mismatch')">
+            Las contraseñas no coinciden
+          </mat-error>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="terms" class="col-span-2">
+          Acepto los términos y condiciones
+        </mat-checkbox>
+        <mat-error
+          *ngIf="
+            form.get('terms')?.hasError('required') &&
+            form.get('terms')?.touched
+          "
+        >
+          Debes aceptar los términos
+        </mat-error>
+
+        <div class="actions col-span-2">
+          <button mat-button type="button" (click)="navigateToLogin()">
+            Ya tengo cuenta
+          </button>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid || loading"
+          >
+            <ng-container *ngIf="!loading">Crear cuenta</ng-container>
+            <ng-container *ngIf="loading">
+              <mat-progress-spinner
+                diameter="22"
+                mode="indeterminate"
+              ></mat-progress-spinner>
+            </ng-container>
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-card>
+</div>
