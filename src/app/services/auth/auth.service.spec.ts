@@ -11,7 +11,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
 
-  const base = `${environment.apiBaseUrl}/auth`;
+  const base = `${environment.apiBaseUrlAuth}/auth`;
   const LS_USER_KEY = 'auth.user';
 
   const userMock: User = {

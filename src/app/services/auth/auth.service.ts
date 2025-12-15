@@ -15,7 +15,10 @@ export class AuthService {
   /** Login and save user in localStorage **/
   login(email: string, password: string): Observable<User> {
     return this.http
-      .post<User>(`${environment.apiBaseUrl}/auth/login`, { email, password })
+      .post<User>(`${environment.apiBaseUrlAuth}/auth/login`, {
+        email,
+        password,
+      })
       .pipe(
         tap((user) => {
           localStorage.setItem(LS_USER_KEY, JSON.stringify(user));
@@ -28,7 +31,7 @@ export class AuthService {
   }
 
   register(dto: RegisterDTO): Observable<void> {
-    return this.http.post<void>(`${environment.apiBaseUrl}/users`, dto);
+    return this.http.post<void>(`${environment.apiBaseUrlAuth}/users`, dto);
   }
 
   /** Get user from localStorage */

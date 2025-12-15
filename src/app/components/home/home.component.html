@@ -30,12 +30,7 @@
       </mat-form-field>
 
       <div class="filter-actions">
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          [disabled]="filterForm.invalid || loading"
-        >
+        <button mat-raised-button color="primary" type="submit">
           <mat-icon>search</mat-icon> Buscar
         </button>
       </div>
@@ -97,7 +92,6 @@
             selectedRow?.analysisRequestId === row.analysisRequestId
           "
         ></tr>
-        <tr mat-row *matRowDef="let row; columns: ['actions']"></tr>
       </table>
 
       <mat-paginator
