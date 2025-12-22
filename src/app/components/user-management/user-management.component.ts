@@ -301,7 +301,12 @@ export class UserManagementComponent implements OnInit {
         <div class="form-row">
           <mat-form-field appearance="outline">
             <mat-label>RUT</mat-label>
-            <input matInput formControlName="rut" [readonly]="!!data.user" />
+            <input
+              matInput
+              formControlName="rut"
+              [readonly]="!!data.user"
+              maxLength="12"
+            />
             <mat-icon matPrefix>badge</mat-icon>
             <mat-error *ngIf="userForm.get('rut')?.hasError('required')">
               Campo obligatorio
@@ -604,6 +609,23 @@ export class UserDialogComponent {
             ],
       ],
     });
+
+    this.userForm.get('rut')?.valueChanges.subscribe((value: string) => {
+      if (value) {
+        if (value.length > 12) return;
+        const formatted = this.formatRut(value);
+        if (formatted !== value) {
+          this.userForm.get('rut')?.setValue(formatted, { emitEvent: false });
+        }
+      }
+    });
+    this.userForm.get('birthDate')?.valueChanges.subscribe((value: Date) => {
+      if (value) {
+        if (value >= new Date()) {
+          this.userForm.get('birthDate')?.setErrors({ invalidDate: true });
+        }
+      }
+    });
   }
 
   onCancel(): void {
@@ -627,6 +649,31 @@ export class UserDialogComponent {
       };
       this.dialogRef.close(result);
     }, 500);
+  }
+
+  private formatRut(value: string): string {
+    // Clean any invalid characters
+    let clean = value.replace(/[^0-9kK]/g, '').toUpperCase();
+
+    if (clean.length <= 1) return clean;
+
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+
+    let formatted = '';
+    let count = 0;
+
+    // Add the thousands separator
+    for (let i = body.length - 1; i >= 0; i--) {
+      formatted = body.charAt(i) + formatted;
+      count++;
+      if (count === 3 && i !== 0) {
+        formatted = '.' + formatted;
+        count = 0;
+      }
+    }
+
+    return `${formatted}-${dv}`;
   }
 }
 
