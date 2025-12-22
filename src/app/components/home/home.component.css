@@ -1,3 +1,37 @@
+.sidenav-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav {
+  width: 250px;
+}
+
+.drawer-header {
+  padding: 16px;
+  background-color: var(--mat-toolbar-container-background-color, #1976d2);
+  color: white;
+}
+
+.drawer-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+mat-nav-list a {
+  cursor: pointer;
+}
+
+mat-nav-list a:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.menu-button {
+  margin-right: 8px;
+}
+
 .container {
   padding: 16px;
   display: grid;
@@ -5,6 +39,8 @@
   gap: 16px;
   max-width: 1400px;
   margin: 0 auto;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .filters,
