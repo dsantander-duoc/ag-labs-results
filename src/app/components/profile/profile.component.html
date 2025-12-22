@@ -137,6 +137,23 @@
           Selecciona un laboratorio
         </mat-error>
       </mat-form-field>
+
+      <div class="form-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="profileForm.invalid || loading"
+        >
+          <mat-icon *ngIf="!loading">save</mat-icon>
+          <mat-progress-spinner
+            *ngIf="loading"
+            diameter="20"
+            mode="indeterminate"
+          ></mat-progress-spinner>
+          Guardar cambios
+        </button>
+      </div>
     </form>
   </mat-card>
 </div>
