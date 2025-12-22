@@ -208,7 +208,7 @@ export class RegisterComponent {
         this.loading = false;
         this.snack.open('Cuenta creada con éxito', 'OK', { duration: 2500 });
         setTimeout(() => {
-          this.router.navigate(['/login']);
+          this.navigateToLogin();
         }, 1500);
       },
       error: () => {

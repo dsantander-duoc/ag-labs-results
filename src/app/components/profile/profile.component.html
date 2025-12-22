@@ -1,0 +1,142 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="goBack()" aria-label="Volver">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Mi Perfil</span>
+  <span class="spacer"></span>
+</mat-toolbar>
+
+<div class="profile-container">
+  <mat-card class="profile-card">
+    <div class="profile-header">
+      <div class="avatar-container">
+        <mat-icon class="avatar-icon">account_circle</mat-icon>
+      </div>
+      <h2>{{ profileData.name }} {{ profileData.lastName }}</h2>
+      <p class="subtitle">{{ profileData.email }}</p>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <form [formGroup]="profileForm" class="profile-form" (ngSubmit)="onSave()">
+      <h3 class="section-title">Información Personal</h3>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>RUT</mat-label>
+          <input matInput formControlName="rut" readonly />
+          <mat-icon matPrefix>badge</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Usuario</mat-label>
+          <input matInput formControlName="username" />
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="profileForm.get('username')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombres</mat-label>
+          <input matInput formControlName="name" />
+          <mat-icon matPrefix>person_outline</mat-icon>
+          <mat-error *ngIf="profileForm.get('name')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Apellidos</mat-label>
+          <input matInput formControlName="lastName" />
+          <mat-icon matPrefix>person_outline</mat-icon>
+          <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Correo electrónico</mat-label>
+          <input matInput type="email" formControlName="email" />
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+          <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
+            Correo inválido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="phone" />
+          <mat-icon matPrefix>phone</mat-icon>
+          <mat-error *ngIf="profileForm.get('phone')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de nacimiento</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="birthDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-icon matPrefix>calendar_today</mat-icon>
+          <mat-error *ngIf="profileForm.get('birthDate')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Comuna</mat-label>
+          <mat-select formControlName="comunaId">
+            <mat-option *ngFor="let c of comunas" [value]="c.id">
+              {{ c.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>location_city</mat-icon>
+          <mat-error *ngIf="profileForm.get('comunaId')?.hasError('required')">
+            Selecciona una comuna
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="address" />
+        <mat-icon matPrefix>home</mat-icon>
+        <mat-error *ngIf="profileForm.get('address')?.hasError('required')">
+          Campo obligatorio
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Laboratorio</mat-label>
+        <mat-select formControlName="laboratoryId">
+          <mat-option *ngFor="let l of laboratories" [value]="l.id">
+            {{ l.name }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matPrefix>science</mat-icon>
+        <mat-error
+          *ngIf="profileForm.get('laboratoryId')?.hasError('required')"
+        >
+          Selecciona un laboratorio
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-card>
+</div>
