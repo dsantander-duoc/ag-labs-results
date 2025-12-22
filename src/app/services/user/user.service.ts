@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../../models/user.model';
-import { Observable } from 'rxjs';
+import { catchError, Observable, tap, throwError } from 'rxjs';
+const LS_USER_KEY = 'auth.user';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +25,16 @@ export class UserService {
   }
 
   update(id: number, user: User): Observable<User> {
-    return this.http.put<User>(`${this.base}/${id}`, user);
+    return this.http.put<User>(`${this.base}/${id}`, user).pipe(
+      tap((user) => {
+        console.log('user', user);
+        localStorage.setItem(LS_USER_KEY, JSON.stringify(user));
+      }),
+      catchError((error) => {
+        console.error('error updating user', error);
+        return throwError(() => new Error('Error al actualizar el usuario'));
+      })
+    );
   }
 
   delete(id: number): Observable<void> {

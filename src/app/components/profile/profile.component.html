@@ -20,7 +20,7 @@
 
     <form [formGroup]="profileForm" class="profile-form" (ngSubmit)="onSave()">
       <h3 class="section-title">Información Personal</h3>
-      
+
       <div class="form-row">
         <mat-form-field appearance="outline">
           <mat-label>RUT</mat-label>
@@ -89,7 +89,10 @@
             [matDatepicker]="picker"
             formControlName="birthDate"
           />
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
           <mat-icon matPrefix>calendar_today</mat-icon>
           <mat-error *ngIf="profileForm.get('birthDate')?.hasError('required')">
@@ -124,34 +127,16 @@
         <mat-label>Laboratorio</mat-label>
         <mat-select formControlName="laboratoryId">
           <mat-option *ngFor="let l of laboratories" [value]="l.id">
-            {{ l.nombre }}
+            {{ l.name }}
           </mat-option>
         </mat-select>
         <mat-icon matPrefix>science</mat-icon>
-        <mat-error *ngIf="profileForm.get('laboratoryId')?.hasError('required')">
+        <mat-error
+          *ngIf="profileForm.get('laboratoryId')?.hasError('required')"
+        >
           Selecciona un laboratorio
         </mat-error>
       </mat-form-field>
-
-      <div class="form-actions">
-        <button mat-button type="button" (click)="onCancel()">
-          Cancelar
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          [disabled]="profileForm.invalid || loading"
-        >
-          <mat-icon *ngIf="!loading">save</mat-icon>
-          <mat-progress-spinner
-            *ngIf="loading"
-            diameter="20"
-            mode="indeterminate"
-          ></mat-progress-spinner>
-          Guardar cambios
-        </button>
-      </div>
     </form>
   </mat-card>
 </div>

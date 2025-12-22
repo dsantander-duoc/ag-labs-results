@@ -21,6 +21,7 @@ export class AuthService {
       })
       .pipe(
         tap((user) => {
+          console.log('user', user);
           localStorage.setItem(LS_USER_KEY, JSON.stringify(user));
         }),
         catchError((error) => {

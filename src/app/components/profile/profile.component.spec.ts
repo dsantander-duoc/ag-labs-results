@@ -9,8 +9,15 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { of, throwError } from 'rxjs';
 
 import { ProfileComponent } from './profile.component';
+import { UserService } from '../../services/user/user.service';
+import { AuthService } from '../../services/auth/auth.service';
+import { LaboratoryService } from '../../services/laboratory/laboratory.service';
+import { User } from '../../models/user.model';
+import { LaboratoryResponse } from '../../models/laboratory.model';
+import { Router } from '@angular/router';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -18,29 +25,73 @@ describe('ProfileComponent', () => {
 
   let snackSpy: jasmine.SpyObj<MatSnackBar>;
   let locationSpy: jasmine.SpyObj<Location>;
+  let userServiceSpy: jasmine.SpyObj<UserService>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let laboratoryServiceSpy: jasmine.SpyObj<LaboratoryService>;
+  let routerSpy: jasmine.SpyObj<Router>;
+
+  const mockUser: User = {
+    userId: 1,
+    rut: '12.345.678-9',
+    username: 'jperez',
+    name: 'Juan',
+    lastName: 'Pérez',
+    email: 'juan.perez@example.com',
+    phone: '+56912345678',
+    birthDate: '1990-01-15',
+    address: 'Av. Principal 123',
+    comunaId: 3,
+    laboratoryId: 1,
+    active: true,
+    roleIds: [1],
+  };
+
+  const labs: LaboratoryResponse[] = [
+    { id: 1, name: 'Lab Central' } as any,
+    { id: 2, name: 'BioTest' } as any,
+  ];
 
   beforeEach(async () => {
     snackSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
     locationSpy = jasmine.createSpyObj('Location', ['back']);
+    userServiceSpy = jasmine.createSpyObj('UserService', ['update']);
+    authServiceSpy = jasmine.createSpyObj('AuthService', ['getUser']);
+    laboratoryServiceSpy = jasmine.createSpyObj('LaboratoryService', [
+      'getAll',
+    ]);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
+    // defaults
+    authServiceSpy.getUser.and.returnValue(mockUser as any);
+    laboratoryServiceSpy.getAll.and.returnValue(of(labs));
+    userServiceSpy.update.and.returnValue(of({} as any));
 
     await TestBed.configureTestingModule({
       imports: [ProfileComponent, NoopAnimationsModule],
       providers: [
         { provide: Location, useValue: locationSpy },
         { provide: MatSnackBar, useValue: snackSpy },
+        { provide: UserService, useValue: userServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: LaboratoryService, useValue: laboratoryServiceSpy },
+        { provide: Router, useValue: routerSpy },
       ],
     })
-      // CLAVE: asegura que el componente use ESTE MatSnackBar (el spy)
       .overrideProvider(MatSnackBar, { useValue: snackSpy })
+      .overrideProvider(UserService, { useValue: userServiceSpy })
+      .overrideProvider(AuthService, { useValue: authServiceSpy })
+      .overrideProvider(LaboratoryService, { useValue: laboratoryServiceSpy })
+      .overrideProvider(Location, { useValue: locationSpy })
+      .overrideProvider(Router, { useValue: routerSpy })
       .compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.detectChanges(); // dispara constructor + subscriptions
   });
 
-  // CLAVE: limpia timers pendientes que Material suele dejar
   afterEach(fakeAsync(() => {
+    // limpia timers pendientes (Angular Material suele dejar algunos)
     flush();
   }));
 
@@ -51,22 +102,24 @@ describe('ProfileComponent', () => {
     return de?.nativeElement as HTMLInputElement;
   }
 
-  it('should create and build form with initial profileData', () => {
+  it('should create and build form with user from AuthService', () => {
     expect(component).toBeTruthy();
-    expect(component.profileForm).toBeTruthy();
 
-    expect(component.profileForm.get('username')?.value).toBe(
-      component.profileData.username
-    );
-    expect(component.profileForm.get('name')?.value).toBe(
-      component.profileData.name
-    );
-    expect(component.profileForm.get('lastName')?.value).toBe(
-      component.profileData.lastName
-    );
+    expect(authServiceSpy.getUser).toHaveBeenCalled();
+    expect(component.profileData.userId).toBe(1);
+
+    expect(component.profileForm.get('username')?.value).toBe('jperez');
+    expect(component.profileForm.get('name')?.value).toBe('Juan');
+    expect(component.profileForm.get('lastName')?.value).toBe('Pérez');
     expect(component.profileForm.get('email')?.value).toBe(
-      component.profileData.email
+      'juan.perez@example.com'
     );
+  });
+
+  it('should load laboratories on constructor', () => {
+    expect(laboratoryServiceSpy.getAll).toHaveBeenCalled();
+    expect(component.laboratories.length).toBe(2);
+    expect(component.laboratories[0].name).toBe('Lab Central');
   });
 
   it('should render toolbar title', () => {
@@ -94,7 +147,6 @@ describe('ProfileComponent', () => {
 
   it('rut control should be disabled in the reactive form', () => {
     const rutControl = component.profileForm.get('rut');
-    expect(rutControl).toBeTruthy();
     expect(rutControl?.disabled).toBeTrue();
   });
 
@@ -105,9 +157,9 @@ describe('ProfileComponent', () => {
       By.css('.profile-header .subtitle')
     )?.nativeElement as HTMLElement;
 
-    expect(h2?.textContent || '').toContain(component.profileData.name);
-    expect(h2?.textContent || '').toContain(component.profileData.lastName);
-    expect(subtitle?.textContent || '').toContain(component.profileData.email);
+    expect(h2?.textContent || '').toContain('Juan');
+    expect(h2?.textContent || '').toContain('Pérez');
+    expect(subtitle?.textContent || '').toContain('juan.perez@example.com');
   });
 
   it('form should be invalid when required fields are empty (and show some mat-errors)', fakeAsync(() => {
@@ -155,59 +207,13 @@ describe('ProfileComponent', () => {
     flush();
   }));
 
-  it('onCancel should reset the form back to profileData', () => {
-    component.profileForm.get('username')?.setValue('otroUser');
-    component.profileForm.get('name')?.setValue('Otro');
-    component.profileForm.get('email')?.setValue('otro@email.com');
-    component.profileForm.get('address')?.setValue('Otra dirección');
-    component.profileForm.get('comunaId')?.setValue(1);
-    component.profileForm.get('laboratoryId')?.setValue(2);
-
-    expect(component.profileForm.get('username')?.value).toBe('otroUser');
-
-    component.onCancel();
-
-    expect(component.profileForm.get('username')?.value).toBe(
-      component.profileData.username
-    );
-    expect(component.profileForm.get('name')?.value).toBe(
-      component.profileData.name
-    );
-    expect(component.profileForm.get('email')?.value).toBe(
-      component.profileData.email
-    );
-    expect(component.profileForm.get('address')?.value).toBe(
-      component.profileData.address
-    );
-    expect(component.profileForm.get('comunaId')?.value).toBe(
-      component.profileData.comunaId
-    );
-    expect(component.profileForm.get('laboratoryId')?.value).toBe(
-      component.profileData.laboratoryId
-    );
-  });
-
-  it('should call onCancel when clicking Cancelar button', () => {
-    spyOn(component, 'onCancel');
-
-    const cancelBtn = fixture.debugElement
-      .queryAll(By.css('button'))
-      .find((b) =>
-        ((b.nativeElement.textContent as string) || '').includes('Cancelar')
-      )?.nativeElement as HTMLButtonElement;
-
-    expect(cancelBtn).toBeTruthy();
-
-    cancelBtn!.click();
-    expect(component.onCancel).toHaveBeenCalled();
-  });
-
   it('onSave should not run when form is invalid', () => {
     component.profileForm.get('username')?.setValue('');
     expect(component.profileForm.invalid).toBeTrue();
 
     component.onSave();
 
+    expect(userServiceSpy.update).not.toHaveBeenCalled();
     expect(snackSpy.open).not.toHaveBeenCalled();
   });
 
@@ -216,21 +222,62 @@ describe('ProfileComponent', () => {
 
     component.onSave();
 
+    expect(userServiceSpy.update).not.toHaveBeenCalled();
     expect(snackSpy.open).not.toHaveBeenCalled();
   });
 
-  it('onSave should open snack when form is valid', () => {
-    // Asegura que está válido
+  it('onSave should not run when userId is missing', () => {
+    // rompe el userId
+    (component.profileData as any).userId = null;
+
+    component.onSave();
+
+    expect(userServiceSpy.update).not.toHaveBeenCalled();
+    expect(snackSpy.open).not.toHaveBeenCalled();
+  });
+
+  it('onSave should call userService.update and open success snack', fakeAsync(() => {
+    userServiceSpy.update.and.returnValue(of({} as any));
+
     expect(component.profileForm.valid).toBeTrue();
 
     component.onSave();
+    tick();
+    fixture.detectChanges();
+
+    expect(userServiceSpy.update).toHaveBeenCalledWith(
+      1,
+      component.profileForm.value
+    );
 
     expect(snackSpy.open).toHaveBeenCalledWith(
       'Perfil actualizado correctamente',
       'Cerrar',
       jasmine.any(Object)
     );
-  });
+
+    expect(component.loading).toBeFalse();
+    flush();
+  }));
+
+  it('onSave should open error snack when update fails', fakeAsync(() => {
+    userServiceSpy.update.and.returnValue(throwError(() => new Error('fail')));
+
+    component.onSave();
+    tick();
+    fixture.detectChanges();
+
+    expect(userServiceSpy.update).toHaveBeenCalled();
+
+    expect(snackSpy.open).toHaveBeenCalledWith(
+      'Error al actualizar el perfil',
+      'Cerrar',
+      jasmine.any(Object)
+    );
+
+    expect(component.loading).toBeFalse();
+    flush();
+  }));
 
   it('should call onSave when submitting the form (ngSubmit)', fakeAsync(() => {
     spyOn(component, 'onSave').and.callThrough();
@@ -238,7 +285,6 @@ describe('ProfileComponent', () => {
     const formDe = fixture.debugElement.query(By.css('form.profile-form'));
     expect(formDe).toBeTruthy();
 
-    // submit real
     formDe.nativeElement.dispatchEvent(new Event('submit'));
     tick();
     fixture.detectChanges();
@@ -246,62 +292,6 @@ describe('ProfileComponent', () => {
     expect(component.onSave).toHaveBeenCalled();
     flush();
   }));
-
-  it('save button should be disabled when form is invalid', fakeAsync(() => {
-    component.profileForm.get('username')?.setValue('');
-    fixture.detectChanges();
-    tick();
-
-    const saveBtn = fixture.debugElement
-      .queryAll(By.css('button'))
-      .find((b) =>
-        ((b.nativeElement.textContent as string) || '').includes(
-          'Guardar cambios'
-        )
-      )?.nativeElement as HTMLButtonElement;
-
-    expect(saveBtn).toBeTruthy();
-    expect(saveBtn!.disabled).toBeTrue();
-    flush();
-  }));
-
-  it('save button should be disabled when loading is true', fakeAsync(() => {
-    component.loading = true;
-    fixture.detectChanges();
-    tick();
-
-    const saveBtn = fixture.debugElement
-      .queryAll(By.css('button'))
-      .find((b) =>
-        ((b.nativeElement.textContent as string) || '').includes(
-          'Guardar cambios'
-        )
-      )?.nativeElement as HTMLButtonElement;
-
-    expect(saveBtn).toBeTruthy();
-    expect(saveBtn!.disabled).toBeTrue();
-    flush();
-  }));
-
-  it('should show spinner in save button when loading is true', () => {
-    component.loading = true;
-    fixture.detectChanges();
-
-    const spinner = fixture.debugElement.query(
-      By.css('button mat-progress-spinner')
-    );
-    expect(spinner).toBeTruthy();
-  });
-
-  it('should hide spinner in save button when loading is false', () => {
-    component.loading = false;
-    fixture.detectChanges();
-
-    const spinner = fixture.debugElement.query(
-      By.css('button mat-progress-spinner')
-    );
-    expect(spinner).toBeNull();
-  });
 
   it('typing in username input should update form control value', fakeAsync(() => {
     const el = getInputByFormControlName('username');

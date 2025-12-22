@@ -20,6 +20,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
+import { UserService } from '../../services/user/user.service';
+import { AuthService } from '../../services/auth/auth.service';
+import { User } from '../../models/user.model';
+import { LaboratoryResponse } from '../../models/laboratory.model';
+import { LaboratoryService } from '../../services/laboratory/laboratory.service';
 
 @Component({
   selector: 'app-profile',
@@ -43,7 +48,7 @@ import { Location } from '@angular/common';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent {
   profileForm: FormGroup;
   loading = false;
 
@@ -55,11 +60,14 @@ export class ProfileComponent implements OnInit {
     rut: '12345678-9',
     username: 'jperez',
     phone: '+56912345678',
-    birthDate: new Date('1990-01-15'),
+    birthDate: '1990-01-15',
     address: 'Av. Principal 123',
     comunaId: 3,
     laboratoryId: 1,
-  };
+    active: true,
+    roleIds: [1],
+    userId: 1,
+  } as User;
 
   // TODO: This should be fetched from the backend
   comunas = [
@@ -68,19 +76,23 @@ export class ProfileComponent implements OnInit {
     { id: 3, nombre: 'Santiago' },
   ];
 
-  // TODO: This should be fetched from the backend
-  laboratories = [
-    { id: 1, nombre: 'Lab Central' },
-    { id: 2, nombre: 'BioTest' },
-    { id: 3, nombre: 'Clínica Norte' },
-  ];
+  laboratories: LaboratoryResponse[] = [];
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private location: Location,
-    private snack: MatSnackBar
+    private snack: MatSnackBar,
+    private userService: UserService,
+    private authService: AuthService,
+    private laboratoryService: LaboratoryService
   ) {
+    this.profileData = this.authService.getUser() as User;
+
+    this.laboratoryService.getAll().subscribe((laboratories) => {
+      this.laboratories = laboratories;
+    });
+
     this.profileForm = this.fb.group({
       rut: [{ value: this.profileData.rut, disabled: true }],
       username: [this.profileData.username, [Validators.required]],
@@ -95,40 +107,31 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    // this.loadUserProfile();
-  }
-
   goBack(): void {
     this.location.back();
   }
 
-  onCancel(): void {
-    this.profileForm.reset({
-      rut: this.profileData.rut,
-      username: this.profileData.username,
-      name: this.profileData.name,
-      lastName: this.profileData.lastName,
-      email: this.profileData.email,
-      phone: this.profileData.phone,
-      birthDate: this.profileData.birthDate,
-      address: this.profileData.address,
-      comunaId: this.profileData.comunaId,
-      laboratoryId: this.profileData.laboratoryId,
-    });
-  }
-
   onSave(): void {
-    if (this.profileForm.invalid || this.loading) return;
+    if (this.profileForm.invalid || this.loading || !this.profileData.userId)
+      return;
 
     this.loading = true;
 
-    // Simulate API call
-    this.loading = false;
-    this.snack.open('Perfil actualizado correctamente', 'Cerrar', {
-      duration: 3000,
-    });
-    // TODO: This should be updated in the backend
-    // this.profileData = { ...this.profileData, ...this.profileForm.value };
+    this.userService
+      .update(this.profileData.userId, this.profileForm.value)
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          this.snack.open('Perfil actualizado correctamente', 'Cerrar', {
+            duration: 3000,
+          });
+        },
+        error: () => {
+          this.loading = false;
+          this.snack.open('Error al actualizar el perfil', 'Cerrar', {
+            duration: 3000,
+          });
+        },
+      });
   }
 }
