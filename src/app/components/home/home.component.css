@@ -1,0 +1,203 @@
+.sidenav-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav {
+  width: 250px;
+}
+
+.drawer-header {
+  padding: 16px;
+  background-color: var(--mat-toolbar-container-background-color, #1976d2);
+  color: white;
+}
+
+.drawer-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+mat-nav-list a {
+  cursor: pointer;
+}
+
+mat-nav-list a:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.menu-button {
+  margin-right: 8px;
+}
+
+.container {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.filters,
+.table-card,
+.details {
+  border-radius: 16px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.filter-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-form mat-form-field {
+  width: 200px;
+  min-width: 180px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.responsive-table {
+  overflow: auto;
+}
+
+table[mat-table] {
+  min-width: 720px;
+}
+
+.selected {
+  background: rgba(25, 118, 210, 0.06);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.detail-grid .full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 599.98px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .filter-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .filter-form mat-form-field {
+    width: 100%;
+  }
+
+  .filter-actions {
+    justify-content: flex-end;
+  }
+
+  .mat-column-laboratoryId,
+  .mat-column-doctorUserId,
+  .mat-column-priority {
+    display: none;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters .mat-mdc-card-content,
+  .table-card .mat-mdc-card-content,
+  .details .mat-mdc-card-content {
+    padding: 12px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 959.98px) {
+  .container {
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+
+  .mat-column-doctorUserId {
+    display: none;
+  }
+
+  .details {
+    position: sticky;
+    top: 16px;
+    height: fit-content;
+  }
+
+  table[mat-table] {
+    min-width: 820px;
+  }
+}
+
+@media (min-width: 960px) {
+  .container {
+    grid-template-columns: 3fr 1.2fr;
+    gap: 20px;
+  }
+
+  .mat-column-laboratoryId,
+  .mat-column-doctorUserId,
+  .mat-column-priority {
+    display: table-cell;
+  }
+
+  .details {
+    position: sticky;
+    top: 16px;
+    height: fit-content;
+  }
+
+  table[mat-table] {
+    min-width: 980px;
+  }
+}
+
+.responsive-table table thead tr th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--mat-table-background, #fff);
+}
+
+@media (max-width: 599.98px) {
+  .mat-mdc-table .mdc-data-table__content tr td,
+  .mat-mdc-table .mdc-data-table__header-row th {
+    padding: 8px 12px;
+  }
+}
+
+.mat-column-actions button + button {
+  margin-left: 4px;
+}

@@ -1,0 +1,6 @@
+projectKey=web-analysis-angular
+serverUrl=http://localhost:9000
+serverVersion=25.12.0.117093
+dashboardUrl=http://localhost:9000/dashboard?id=web-analysis-angular
+ceTaskId=34b76eaf-938d-4eb7-b680-a01744c1cfc6
+ceTaskUrl=http://localhost:9000/api/ce/task?id=34b76eaf-938d-4eb7-b680-a01744c1cfc6

@@ -1,0 +1,165 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer mode="over" class="sidenav">
+    <div class="drawer-header">
+      <h2>Menú</h2>
+    </div>
+    <mat-nav-list>
+      <a mat-list-item (click)="navigateToProfile()">
+        <mat-icon matListItemIcon>account_circle</mat-icon>
+        <span matListItemTitle>Perfil</span>
+      </a>
+      <a mat-list-item (click)="navigateToUserManagement()">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Gestión de Usuarios</span>
+      </a>
+      <mat-divider></mat-divider>
+      <a mat-list-item (click)="logout()">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Salir</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <button mat-icon-button (click)="toggleDrawer()" class="menu-button">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>Administración de Resultados</span>
+      <span class="spacer"></span>
+      <button mat-button (click)="navigateToProfile()">
+        <mat-icon>account_circle</mat-icon>Perfil
+      </button>
+      <button mat-button (click)="logout()">
+        <mat-icon>logout</mat-icon>Salir
+      </button>
+    </mat-toolbar>
+
+    <div class="container">
+      <!-- Filters -->
+      <mat-card class="filters">
+        <mat-tab-group (selectedIndexChange)="onModeChange(modes[$event])">
+          <mat-tab label="Por Paciente"></mat-tab>
+          <mat-tab label="Por Laboratorio"></mat-tab>
+          <mat-tab label="Por Doctor"></mat-tab>
+        </mat-tab-group>
+
+        <form
+          [formGroup]="filterForm"
+          class="filter-form"
+          (ngSubmit)="search()"
+        >
+          <mat-form-field appearance="outline">
+            <mat-label>ID</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="idValue"
+              placeholder="Ej: 123"
+            />
+            <mat-error *ngIf="filterForm.get('idValue')?.hasError('required')"
+              >Obligatorio</mat-error
+            >
+          </mat-form-field>
+
+          <div class="filter-actions">
+            <button mat-raised-button color="primary" type="submit">
+              <mat-icon>search</mat-icon> Buscar
+            </button>
+          </div>
+        </form>
+      </mat-card>
+
+      <!-- Table -->
+      <mat-card class="table-card">
+        <div class="table-actions">
+          <button
+            mat-flat-button
+            color="accent"
+            (click)="openCreateRequestDialog()"
+          >
+            <mat-icon>add</mat-icon> Nueva solicitud
+          </button>
+          <mat-progress-spinner
+            *ngIf="loading"
+            diameter="28"
+            mode="indeterminate"
+          ></mat-progress-spinner>
+        </div>
+
+        <div class="responsive-table">
+          <table mat-table [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+              <td mat-cell *matCellDef="let r">{{ r.analysisRequestId }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="patientRut">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Paciente
+              </th>
+              <td mat-cell *matCellDef="let r">{{ r.patientRut }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="laboratoryName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Laboratorio
+              </th>
+              <td mat-cell *matCellDef="let r">{{ r.laboratoryName }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="doctorName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Doctor</th>
+              <td mat-cell *matCellDef="let r">{{ r.doctorName }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="requestStatus">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+              <td mat-cell *matCellDef="let r">{{ r.requestStatus || "—" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="requestDate">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Fecha de solicitud
+              </th>
+              <td mat-cell *matCellDef="let r">{{ r.requestDate || "—" }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              [class.selected]="
+                selectedRow?.analysisRequestId === row.analysisRequestId
+              "
+            ></tr>
+          </table>
+
+          <mat-paginator
+            [pageSize]="10"
+            [pageSizeOptions]="[5, 10, 25]"
+            showFirstLastButtons
+          ></mat-paginator>
+        </div>
+      </mat-card>
+
+      <!-- Detail -->
+      <mat-card class="details" *ngIf="selectedRow">
+        <h3>Detalle #{{ selectedRow.analysisRequestId }}</h3>
+        <mat-divider></mat-divider>
+        <div class="detail-grid">
+          <div><strong>Paciente:</strong> {{ selectedRow.patientRut }}</div>
+          <div>
+            <strong>Laboratorio:</strong> {{ selectedRow.laboratoryName }}
+          </div>
+          <div><strong>Doctor:</strong> {{ selectedRow.doctorName }}</div>
+          <div><strong>Estado:</strong> {{ selectedRow.status || "—" }}</div>
+          <div>
+            <strong>Fecha de solicitud:</strong>
+            {{ selectedRow.requestDate || "—" }}
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

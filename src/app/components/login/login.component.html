@@ -1,0 +1,70 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header class="login-card-header">
+      <img src="../../../assets/Labsys.png" alt="Logo" class="login-logo" />
+      <mat-card-title>Bienvenido!</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="login-card-content">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Correo electrónico</mat-label>
+          <input
+            matInput
+            formControlName="email"
+            type="email"
+            placeholder="ejemplo@correo.cl"
+            required
+          />
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+            Correo inválido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input
+            matInput
+            [type]="hide ? 'password' : 'text'"
+            formControlName="password"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="hide = !hide"
+            type="button"
+            [disabled]="loading"
+          >
+            <mat-icon>{{ hide ? "visibility_off" : "visibility" }}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            Campo obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="loginForm.invalid || loading"
+          >
+            <ng-container *ngIf="!loading"> Ingresar </ng-container>
+            <ng-container *ngIf="loading">
+              <mat-progress-spinner
+                diameter="24"
+                mode="indeterminate"
+                color="accent"
+              ></mat-progress-spinner>
+            </ng-container>
+          </button>
+          <button mat-button (click)="navigateToRegister()">Registrarse</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
